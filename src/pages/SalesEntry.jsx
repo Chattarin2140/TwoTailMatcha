@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getMenus, addSale, todayStr } from '../lib/storage';
 
 export default function SalesEntry({ onChange }) {
-  const [menus] = useState(getMenus());
+  const [menus, setMenus] = useState([]);
   const [date, setDate] = useState(todayStr());
   const [cart, setCart] = useState({});
   const [selectedAddons, setSelectedAddons] = useState({});
   const [savedFlash, setSavedFlash] = useState(false);
+
+  useEffect(() => {
+    getMenus().then(setMenus);
+  }, []);
 
   const bump = (menuId, delta) => {
     setCart((prev) => {
@@ -30,7 +34,7 @@ export default function SalesEntry({ onChange }) {
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
-  const commit = () => {
+  const commit = async () => {
     if (cartCount === 0) return;
     const now = new Date().toISOString();
     for (const [menuId, qty] of Object.entries(cart)) {
@@ -39,7 +43,7 @@ export default function SalesEntry({ onChange }) {
       const addons = (menu?.addons || [])
         .filter((a) => chosenIds.has(a.id))
         .map((a) => ({ name: a.name, price: a.price }));
-      addSale({ menu_id: menuId, quantity: qty, date, timestamp: now, addons });
+      await addSale({ menu_id: menuId, quantity: qty, date, timestamp: now, addons });
     }
     setCart({});
     setSelectedAddons({});

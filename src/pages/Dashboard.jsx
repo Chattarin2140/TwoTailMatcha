@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -42,9 +42,14 @@ function StatCard({ label, value, tone }) {
 }
 
 export default function Dashboard() {
-  const [menus] = useState(getMenus());
-  const [sales] = useState(getSales());
+  const [menus, setMenus] = useState([]);
+  const [sales, setSales] = useState([]);
   const [range, setRange] = useState('week');
+
+  useEffect(() => {
+    getMenus().then(setMenus);
+    getSales().then(setSales);
+  }, []);
 
   const { from, to } = rangeToDates(range);
   const filtered = useMemo(() => filterSales(sales, { from, to }), [sales, from, to]);

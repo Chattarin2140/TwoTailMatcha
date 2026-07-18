@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getMenus, getSales } from '../lib/storage';
 import { summarize, generateInsights, profitPct } from '../lib/calc';
 
@@ -10,8 +10,13 @@ const STYLE = {
 };
 
 export default function Insights() {
-  const [menus] = useState(getMenus());
-  const [sales] = useState(getSales());
+  const [menus, setMenus] = useState([]);
+  const [sales, setSales] = useState([]);
+
+  useEffect(() => {
+    getMenus().then(setMenus);
+    getSales().then(setSales);
+  }, []);
 
   const summary = useMemo(() => summarize(sales, menus), [sales, menus]);
   const insights = useMemo(() => generateInsights(summary.perMenu), [summary]);

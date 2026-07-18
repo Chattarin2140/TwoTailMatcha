@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getMenus, addMenu, updateMenu, deleteMenu, resetMenusToSeed } from '../lib/storage';
 import { profitPerCup, profitPct } from '../lib/calc';
 
@@ -12,7 +12,7 @@ function uid() {
 }
 
 export default function MenuManagement({ onChange }) {
-  const [menus, setMenus] = useState(getMenus());
+  const [menus, setMenus] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [addons, setAddons] = useState([]);
   const [addonDraft, setAddonDraft] = useState(emptyAddon);
@@ -21,6 +21,10 @@ export default function MenuManagement({ onChange }) {
   const [editingId, setEditingId] = useState(null);
 
   const ingredientsTotal = ingredients.reduce((sum, i) => sum + i.cost, 0);
+
+  useEffect(() => {
+    getMenus().then(setMenus);
+  }, []);
 
   const refresh = (list) => {
     setMenus(list);
@@ -51,7 +55,7 @@ export default function MenuManagement({ onChange }) {
     setIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const payload = {
       name: form.name.trim(),
@@ -64,10 +68,10 @@ export default function MenuManagement({ onChange }) {
     if (!payload.name || payload.cost_price < 0 || payload.sell_price < 0) return;
 
     if (editingId) {
-      refresh(updateMenu(editingId, payload));
+      refresh(await updateMenu(editingId, payload));
       setEditingId(null);
     } else {
-      refresh(addMenu(payload));
+      refresh(await addMenu(payload));
     }
     setForm(emptyForm);
     setAddons([]);
@@ -99,19 +103,19 @@ export default function MenuManagement({ onChange }) {
     setIngredientDraft(emptyIngredient);
   };
 
-  const remove = (id) => {
+  const remove = async (id) => {
     if (!confirm('ลบเมนูนี้? รายการขายที่บันทึกไว้จะยังอยู่แต่จะไม่ผูกกับเมนูนี้แล้ว')) return;
-    refresh(deleteMenu(id));
+    refresh(await deleteMenu(id));
   };
 
-  const resetToSeed = () => {
+  const resetToSeed = async () => {
     if (
       !confirm(
         'รีเซ็ตเมนูทั้งหมดกลับเป็นเมนู Two Tails Matcha เริ่มต้น? เมนูที่แก้ไข/เพิ่มเองไว้จะหายหมด (รายการขายที่บันทึกไว้แล้วไม่หาย)'
       )
     )
       return;
-    refresh(resetMenusToSeed());
+    refresh(await resetMenusToSeed());
   };
 
   return (

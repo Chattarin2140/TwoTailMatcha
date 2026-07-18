@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getMenus, getSales, updateSale, deleteSale } from '../lib/storage';
 import { downloadCsv } from '../lib/csv';
 import { saleUnitPrice, addonsTotal } from '../lib/calc';
 
 export default function SalesHistory({ onChange }) {
-  const [menus] = useState(getMenus());
-  const [sales, setSales] = useState(getSales());
+  const [menus, setMenus] = useState([]);
+  const [sales, setSales] = useState([]);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [menuFilter, setMenuFilter] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editQty, setEditQty] = useState('');
+
+  useEffect(() => {
+    getMenus().then(setMenus);
+    getSales().then(setSales);
+  }, []);
 
   const menuById = Object.fromEntries(menus.map((m) => [m.id, m]));
 
@@ -25,9 +30,9 @@ export default function SalesHistory({ onChange }) {
     onChange?.();
   };
 
-  const remove = (id) => {
+  const remove = async (id) => {
     if (!confirm('ลบรายการนี้?')) return;
-    refresh(deleteSale(id));
+    refresh(await deleteSale(id));
   };
 
   const startEdit = (s) => {
@@ -35,10 +40,10 @@ export default function SalesHistory({ onChange }) {
     setEditQty(String(s.quantity));
   };
 
-  const saveEdit = (id) => {
+  const saveEdit = async (id) => {
     const qty = Number(editQty);
     if (qty <= 0) return;
-    refresh(updateSale(id, { quantity: qty }));
+    refresh(await updateSale(id, { quantity: qty }));
     setEditingId(null);
   };
 

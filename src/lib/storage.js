@@ -1,21 +1,7 @@
-const MENU_KEY = 'dst_menus';
-const SALE_KEY = 'dst_sales';
+import { supabase } from './supabaseClient';
 
 function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-function read(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function write(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+  return crypto.randomUUID();
 }
 
 function buildSeedMenus() {
@@ -32,6 +18,7 @@ function buildSeedMenus() {
         { id: uid(), name: 'Cold foam', price: 15 },
         { id: uid(), name: 'Strawberry cold foam', price: 25 },
       ],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -45,6 +32,7 @@ function buildSeedMenus() {
         { id: uid(), name: 'นมโอ๊ต (good mate barista)', price: 20 },
         { id: uid(), name: 'แยกน้ำ', price: 5 },
       ],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -53,6 +41,7 @@ function buildSeedMenus() {
       cost_price: 0,
       sell_price: 150,
       addons: [],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -61,6 +50,7 @@ function buildSeedMenus() {
       cost_price: 0,
       sell_price: 170,
       addons: [],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -69,6 +59,7 @@ function buildSeedMenus() {
       cost_price: 0,
       sell_price: 140,
       addons: [],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -77,6 +68,7 @@ function buildSeedMenus() {
       cost_price: 0,
       sell_price: 145,
       addons: [],
+      ingredients: [],
     },
     {
       id: uid(),
@@ -85,74 +77,87 @@ function buildSeedMenus() {
       cost_price: 0,
       sell_price: 140,
       addons: [],
+      ingredients: [],
     },
   ];
 }
 
-export function getMenus() {
-  const existing = read(MENU_KEY);
+async function fetchMenus() {
+  const { data, error } = await supabase
+    .from('menus')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data.map((m) => ({ addons: [], ingredients: [], ...m }));
+}
+
+export async function getMenus() {
+  const existing = await fetchMenus();
   if (existing.length === 0) {
-    const seed = buildSeedMenus();
-    write(MENU_KEY, seed);
-    return seed;
+    const { error } = await supabase.from('menus').insert(buildSeedMenus());
+    if (error) throw error;
+    return fetchMenus();
   }
-  return existing.map((m) => ({ addons: [], ingredients: [], ...m }));
+  return existing;
 }
 
-export function saveMenus(menus) {
-  write(MENU_KEY, menus);
+export async function addMenu(menu) {
+  const row = { id: uid(), addons: [], ingredients: [], ...menu };
+  const { error } = await supabase.from('menus').insert(row);
+  if (error) throw error;
+  return fetchMenus();
 }
 
-export function resetMenusToSeed() {
-  const seed = buildSeedMenus();
-  write(MENU_KEY, seed);
-  return seed;
+export async function updateMenu(id, patch) {
+  const { error } = await supabase.from('menus').update(patch).eq('id', id);
+  if (error) throw error;
+  return fetchMenus();
 }
 
-export function addMenu(menu) {
-  const menus = getMenus();
-  const next = [...menus, { id: uid(), addons: [], ingredients: [], ...menu }];
-  saveMenus(next);
-  return next;
+export async function deleteMenu(id) {
+  const { error } = await supabase.from('menus').delete().eq('id', id);
+  if (error) throw error;
+  return fetchMenus();
 }
 
-export function updateMenu(id, patch) {
-  const menus = getMenus().map((m) => (m.id === id ? { ...m, ...patch } : m));
-  saveMenus(menus);
-  return menus;
+export async function resetMenusToSeed() {
+  const { error: delError } = await supabase.from('menus').delete().not('id', 'is', null);
+  if (delError) throw delError;
+  const { error } = await supabase.from('menus').insert(buildSeedMenus());
+  if (error) throw error;
+  return fetchMenus();
 }
 
-export function deleteMenu(id) {
-  const menus = getMenus().filter((m) => m.id !== id);
-  saveMenus(menus);
-  return menus;
+async function fetchSales() {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data.map((s) => ({ addons: [], ...s }));
 }
 
-export function getSales() {
-  return read(SALE_KEY);
+export async function getSales() {
+  return fetchSales();
 }
 
-export function saveSales(sales) {
-  write(SALE_KEY, sales);
+export async function addSale(sale) {
+  const row = { id: uid(), addons: [], ...sale };
+  const { error } = await supabase.from('sales').insert(row);
+  if (error) throw error;
+  return fetchSales();
 }
 
-export function addSale(sale) {
-  const sales = getSales();
-  const next = [...sales, { id: uid(), addons: [], ...sale }];
-  saveSales(next);
-  return next;
+export async function updateSale(id, patch) {
+  const { error } = await supabase.from('sales').update(patch).eq('id', id);
+  if (error) throw error;
+  return fetchSales();
 }
 
-export function updateSale(id, patch) {
-  const sales = getSales().map((s) => (s.id === id ? { ...s, ...patch } : s));
-  saveSales(sales);
-  return sales;
-}
-
-export function deleteSale(id) {
-  const sales = getSales().filter((s) => s.id !== id);
-  saveSales(sales);
-  return sales;
+export async function deleteSale(id) {
+  const { error } = await supabase.from('sales').delete().eq('id', id);
+  if (error) throw error;
+  return fetchSales();
 }
 
 export function todayStr() {
