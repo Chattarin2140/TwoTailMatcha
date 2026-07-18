@@ -214,7 +214,7 @@ export default function MenuManagement({ onChange }) {
                 ))}
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 className="flex-1 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
                 placeholder="ชื่อตัวเลือก เช่น Cold foam"
@@ -225,7 +225,7 @@ export default function MenuManagement({ onChange }) {
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-28 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+                className="sm:w-28 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
                 placeholder="ราคา +บาท"
                 value={addonDraft.price}
                 onChange={(e) => setAddonDraft({ ...addonDraft, price: e.target.value })}
@@ -233,7 +233,7 @@ export default function MenuManagement({ onChange }) {
               <button
                 type="button"
                 onClick={addAddonDraft}
-                className="bg-stone-800 text-white rounded-lg px-3 py-1.5 text-sm"
+                className="shrink-0 whitespace-nowrap bg-stone-800 text-white rounded-lg px-3 py-1.5 text-sm"
               >
                 เพิ่มตัวเลือก
               </button>
@@ -266,7 +266,7 @@ export default function MenuManagement({ onChange }) {
                 </span>
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 className="flex-1 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
                 placeholder="ส่วนประกอบ เช่น นม"
@@ -277,7 +277,7 @@ export default function MenuManagement({ onChange }) {
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-28 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+                className="sm:w-28 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
                 placeholder="ต้นทุน บาท"
                 value={ingredientDraft.cost}
                 onChange={(e) => setIngredientDraft({ ...ingredientDraft, cost: e.target.value })}
@@ -285,7 +285,7 @@ export default function MenuManagement({ onChange }) {
               <button
                 type="button"
                 onClick={addIngredientDraft}
-                className="bg-stone-800 text-white rounded-lg px-3 py-1.5 text-sm"
+                className="shrink-0 whitespace-nowrap bg-stone-800 text-white rounded-lg px-3 py-1.5 text-sm"
               >
                 เพิ่มส่วนประกอบ
               </button>
@@ -294,16 +294,16 @@ export default function MenuManagement({ onChange }) {
         </form>
       </div>
 
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-stone-50 text-stone-500 text-left">
             <tr>
-              <th className="px-4 py-2">ชื่อเมนู</th>
-              <th className="px-4 py-2">หมวดหมู่</th>
-              <th className="px-4 py-2 text-right">ต้นทุน</th>
-              <th className="px-4 py-2 text-right">ราคาขาย</th>
-              <th className="px-4 py-2 text-right">กำไร/แก้ว</th>
-              <th className="px-4 py-2 text-right">% กำไร</th>
+              <th className="px-4 py-2 whitespace-nowrap">ชื่อเมนู</th>
+              <th className="px-4 py-2 whitespace-nowrap">หมวดหมู่</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">ต้นทุน</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">ราคาขาย</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">กำไร/แก้ว</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">% กำไร</th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>

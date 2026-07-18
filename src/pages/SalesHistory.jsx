@@ -104,14 +104,14 @@ export default function SalesHistory({ onChange }) {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-stone-50 text-stone-500 text-left">
             <tr>
-              <th className="px-4 py-2">วันที่</th>
-              <th className="px-4 py-2">เมนู</th>
-              <th className="px-4 py-2 text-right">จำนวน</th>
-              <th className="px-4 py-2 text-right">ยอดขาย</th>
+              <th className="px-4 py-2 whitespace-nowrap">วันที่</th>
+              <th className="px-4 py-2 whitespace-nowrap">เมนู</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">จำนวน</th>
+              <th className="px-4 py-2 text-right whitespace-nowrap">ยอดขาย</th>
               <th className="px-4 py-2 text-right">กำไร</th>
               <th className="px-4 py-2"></th>
             </tr>
