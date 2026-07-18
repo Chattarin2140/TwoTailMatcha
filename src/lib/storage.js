@@ -96,7 +96,7 @@ export function getMenus() {
     write(MENU_KEY, seed);
     return seed;
   }
-  return existing.map((m) => ({ addons: [], ...m }));
+  return existing.map((m) => ({ addons: [], ingredients: [], ...m }));
 }
 
 export function saveMenus(menus) {
@@ -111,7 +111,7 @@ export function resetMenusToSeed() {
 
 export function addMenu(menu) {
   const menus = getMenus();
-  const next = [...menus, { id: uid(), addons: [], ...menu }];
+  const next = [...menus, { id: uid(), addons: [], ingredients: [], ...menu }];
   saveMenus(next);
   return next;
 }

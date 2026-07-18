@@ -5,6 +5,7 @@ import { profitPerCup, profitPct } from '../lib/calc';
 const CATEGORIES = ['Matcha', 'ชา', 'กาแฟ', 'น้ำผลไม้', 'โซดา', 'อื่นๆ'];
 const emptyForm = { name: '', category: CATEGORIES[0], cost_price: '', sell_price: '' };
 const emptyAddon = { name: '', price: '' };
+const emptyIngredient = { name: '', cost: '' };
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -15,7 +16,11 @@ export default function MenuManagement({ onChange }) {
   const [form, setForm] = useState(emptyForm);
   const [addons, setAddons] = useState([]);
   const [addonDraft, setAddonDraft] = useState(emptyAddon);
+  const [ingredients, setIngredients] = useState([]);
+  const [ingredientDraft, setIngredientDraft] = useState(emptyIngredient);
   const [editingId, setEditingId] = useState(null);
+
+  const ingredientsTotal = ingredients.reduce((sum, i) => sum + i.cost, 0);
 
   const refresh = (list) => {
     setMenus(list);
@@ -34,14 +39,27 @@ export default function MenuManagement({ onChange }) {
     setAddons((prev) => prev.filter((a) => a.id !== id));
   };
 
+  const addIngredientDraft = () => {
+    const name = ingredientDraft.name.trim();
+    const cost = Number(ingredientDraft.cost);
+    if (!name || cost < 0 || Number.isNaN(cost)) return;
+    setIngredients((prev) => [...prev, { id: uid(), name, cost }]);
+    setIngredientDraft(emptyIngredient);
+  };
+
+  const removeIngredient = (id) => {
+    setIngredients((prev) => prev.filter((i) => i.id !== id));
+  };
+
   const submit = (e) => {
     e.preventDefault();
     const payload = {
       name: form.name.trim(),
       category: form.category,
-      cost_price: Number(form.cost_price),
+      cost_price: ingredients.length > 0 ? ingredientsTotal : Number(form.cost_price),
       sell_price: Number(form.sell_price),
       addons,
+      ingredients,
     };
     if (!payload.name || payload.cost_price < 0 || payload.sell_price < 0) return;
 
@@ -54,6 +72,8 @@ export default function MenuManagement({ onChange }) {
     setForm(emptyForm);
     setAddons([]);
     setAddonDraft(emptyAddon);
+    setIngredients([]);
+    setIngredientDraft(emptyIngredient);
   };
 
   const startEdit = (m) => {
@@ -66,6 +86,8 @@ export default function MenuManagement({ onChange }) {
     });
     setAddons(m.addons || []);
     setAddonDraft(emptyAddon);
+    setIngredients(m.ingredients || []);
+    setIngredientDraft(emptyIngredient);
   };
 
   const cancelEdit = () => {
@@ -73,6 +95,8 @@ export default function MenuManagement({ onChange }) {
     setForm(emptyForm);
     setAddons([]);
     setAddonDraft(emptyAddon);
+    setIngredients([]);
+    setIngredientDraft(emptyIngredient);
   };
 
   const remove = (id) => {
@@ -129,10 +153,13 @@ export default function MenuManagement({ onChange }) {
               type="number"
               min="0"
               step="0.01"
-              className="border border-stone-300 rounded-lg px-3 py-2"
+              className={`border border-stone-300 rounded-lg px-3 py-2 ${
+                ingredients.length > 0 ? 'bg-stone-100 text-stone-500' : ''
+              }`}
               placeholder="ต้นทุน (บาท)"
-              value={form.cost_price}
+              value={ingredients.length > 0 ? ingredientsTotal.toFixed(2) : form.cost_price}
               onChange={(e) => setForm({ ...form, cost_price: e.target.value })}
+              readOnly={ingredients.length > 0}
               required
             />
             <input
@@ -212,6 +239,58 @@ export default function MenuManagement({ onChange }) {
               </button>
             </div>
           </div>
+
+          <div className="border-t border-stone-100 pt-3">
+            <div className="text-xs text-stone-500 mb-2">
+              ต้นทุนแยกส่วนต่อแก้ว (เช่น นม 8, มัทฉะ 12, น้ำแข็ง 3) — ถ้ากรอกตรงนี้ ต้นทุนรวมด้านบนจะคำนวณให้อัตโนมัติ
+            </div>
+            {ingredients.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {ingredients.map((i) => (
+                  <span
+                    key={i.id}
+                    className="flex items-center gap-1 text-xs bg-amber-50 text-amber-700 rounded-full px-2.5 py-1"
+                  >
+                    {i.name} {i.cost}
+                    <button
+                      type="button"
+                      onClick={() => removeIngredient(i.id)}
+                      className="text-amber-400 hover:text-red-500 ml-1"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <span className="text-xs font-semibold text-stone-500 px-1 py-1">
+                  รวม {ingredientsTotal.toFixed(2)} บาท
+                </span>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                className="flex-1 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+                placeholder="ส่วนประกอบ เช่น นม"
+                value={ingredientDraft.name}
+                onChange={(e) => setIngredientDraft({ ...ingredientDraft, name: e.target.value })}
+              />
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                className="w-28 border border-stone-300 rounded-lg px-3 py-1.5 text-sm"
+                placeholder="ต้นทุน บาท"
+                value={ingredientDraft.cost}
+                onChange={(e) => setIngredientDraft({ ...ingredientDraft, cost: e.target.value })}
+              />
+              <button
+                type="button"
+                onClick={addIngredientDraft}
+                className="bg-stone-800 text-white rounded-lg px-3 py-1.5 text-sm"
+              >
+                เพิ่มส่วนประกอบ
+              </button>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -243,7 +322,14 @@ export default function MenuManagement({ onChange }) {
                     )}
                   </td>
                   <td className="px-4 py-2 text-stone-500">{m.category}</td>
-                  <td className="px-4 py-2 text-right">{m.cost_price.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right">
+                    {m.cost_price.toFixed(2)}
+                    {m.ingredients?.length > 0 && (
+                      <div className="text-xs text-stone-400 font-normal mt-0.5">
+                        {m.ingredients.map((i) => `${i.name} ${i.cost}`).join(', ')}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-2 text-right">{m.sell_price.toFixed(2)}</td>
                   <td
                     className={`px-4 py-2 text-right font-semibold ${
