@@ -1,18 +1,21 @@
 export function profitPerCup(menu) {
-  return menu.sell_price - menu.cost_price;
+  const sell = Number(menu.sell_price) || 0;
+  const cost = Number(menu.cost_price) || 0;
+  return sell - cost;
 }
 
 export function addonsTotal(sale) {
-  return (sale.addons || []).reduce((sum, a) => sum + a.price, 0);
+  return (sale.addons || []).reduce((sum, a) => sum + (Number(a.price) || 0), 0);
 }
 
 export function saleUnitPrice(sale, menu) {
-  return menu.sell_price + addonsTotal(sale);
+  return (Number(menu.sell_price) || 0) + addonsTotal(sale);
 }
 
 export function profitPct(menu) {
-  if (menu.sell_price === 0) return 0;
-  return (profitPerCup(menu) / menu.sell_price) * 100;
+  const sell = Number(menu.sell_price) || 0;
+  if (sell === 0) return 0;
+  return (profitPerCup(menu) / sell) * 100;
 }
 
 function inRange(dateStr, from, to) {

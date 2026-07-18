@@ -323,14 +323,14 @@ export default function MenuManagement({ onChange }) {
                   </td>
                   <td className="px-4 py-2 text-stone-500">{m.category}</td>
                   <td className="px-4 py-2 text-right">
-                    {m.cost_price.toFixed(2)}
+                    {(Number(m.cost_price) || 0).toFixed(2)}
                     {m.ingredients?.length > 0 && (
                       <div className="text-xs text-stone-400 font-normal mt-0.5">
                         {m.ingredients.map((i) => `${i.name} ${i.cost}`).join(', ')}
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-right">{m.sell_price.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right">{(Number(m.sell_price) || 0).toFixed(2)}</td>
                   <td
                     className={`px-4 py-2 text-right font-semibold ${
                       profit >= 0 ? 'text-emerald-600' : 'text-red-600'
